@@ -1,0 +1,25 @@
+name: Daily Weather Data
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # Runs daily at 10:00 AM
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  fetch-weather-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Run Weather Script
+      run: ./weather.sh
+
+    - name: Commit and Push Changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add data/weather/
+        git commit -m "Add weather data [$(date "+%Y%m%d_%H%M%S")]"
+        git push
