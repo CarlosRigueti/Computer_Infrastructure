@@ -22,6 +22,10 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y wget
 
+    # Grant execution permissions to weather.sh
+    - name: Set execute permissions
+      run: chmod +x weather.sh
+
     # Prevent execution after a specific date
     - name: Ensure workflow stops post-2024
       run: |
@@ -60,4 +64,3 @@ jobs:
         # Synchronize with remote to prevent conflicts
         git pull origin main --rebase
         git push origin main
-
