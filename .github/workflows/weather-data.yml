@@ -1,66 +1,68 @@
-name: Daily Weather Update
+name: Run Daily Weather Data
 
 on:
   schedule:
-    # Executes at 10:00 AM UTC daily
+    # Run at 10:00 AM UTC
     - cron: '0 10 * * *'
-  workflow_dispatch: # Enables manual execution if needed
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 permissions:
-  contents: write # Required for pushing changes to the repository
+  contents: write # Grant write permissions to push changes
 
 jobs:
-  collect-weather:
-    runs-on: ubuntu-latest # Use a Linux virtual machine for execution
+  run-weather:
+    runs-on: ubuntu-latest  # Use Ubuntu VM
 
     steps:
-    # Pull the repository files
-    - name: Clone repository
+    # Check out the repository
+    - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Prepare environment with necessary tools
-    - name: Install dependencies
+    # Set up Python 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    # Set up bash and wget
+    - name: Set up bash and wget
       run: sudo apt-get update && sudo apt-get install -y wget
 
-    # Grant execution permissions to weather.sh
-    - name: Set execute permissions
-      run: chmod +x weather.sh
-
-    # Prevent execution after a specific date
-    - name: Ensure workflow stops post-2024
+    # Skip if current date is past 31st December 2024
+    - name: Check date to stop after Dec 31, 2024
       run: |
-        today=$(date +'%Y-%m-%d')
-        cutoff="2024-12-31"
-        if [[ "$today" > "$cutoff" ]]; then
-          echo "Date $today exceeds $cutoff. Workflow will not proceed."
+        current_date=$(date +'%Y-%m-%d')
+        end_date="2024-12-31"
+        if [[ "$current_date" > "$end_date" ]]; then
+          echo "The current date ($current_date) is past December 31, 2024. Exiting workflow."
           exit 0
         fi
 
-    # Execute the weather data script
-    - name: Execute weather retrieval
-      run: ./weather.sh
+    # Run the weather script
+    - name: Run weather script
+      run: bash weather.sh  # Corrected to run the script with bash
 
-    # Track changes in weather data files
-    - name: Commit and synchronize changes
+    # Commit and push the new weather data
+    - name: Commit and push changes
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git config --global user.name "Automated Runner"
-        git config --global user.email "runner@github.com"
-
-        # Fetch the latest updates from the repository
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+    
+        # Fetch the latest changes from the remote main branch
         git fetch origin main
 
-        # Verify if new data exists
-        if git diff --quiet data/weather/*.json; then
-          echo "No updates detected in weather data."
-          exit 0
+        # Check if there are changes in the weather data files
+        if git diff --exit-code data/weather/*.json; then
+          echo "No changes detected in the weather data."
+          exit 0  # Exit the workflow if no changes
         fi
 
-        # Stage, commit, and push changes
+        # Add and commit the new weather data
         git add data/weather/*.json
-        git commit -m "Weather data update: $(date +'%Y-%m-%d %H:%M:%S')"
+        git commit -m "Update weather data for $(date +'%Y-%m-%d %H:%M:%S')"
 
-        # Synchronize with remote to prevent conflicts
-        git pull origin main --rebase
-        git push origin main
+        # Merge changes from remote main branch and push
+        git pull origin main --rebase # Rebase instead of merge to avoid merge commits
+        git push origin main  # Push the changes back to the repository
