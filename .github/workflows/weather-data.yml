@@ -3,7 +3,7 @@ name: Daily Weather Update
 on:
   schedule:
     # Run every day at 10:00 AM UTC
-    - cron: '0 10 * * *'
+    - cron: '20 19 * * *'
   workflow_dispatch: # Allows the workflow to be triggered manually if necessary
 
 permissions:
