@@ -33,3 +33,4 @@ jobs:
         deadline="2024-12-31"
         if [[ "$current_date" > "$deadline" ]]; then
           echo "The date $current_date has passed the set deadline $deadl
+git
