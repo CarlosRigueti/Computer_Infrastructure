@@ -2,37 +2,37 @@ name: Run Daily Weather Data
 
 on:
   schedule:
-     # Run daily at 10:00 AM UTC
+     # Execute the workflow daily at 10:00 AM UTC
     - cron: '0 10 * * *'
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  workflow_dispatch:  # Enable manual execution of the workflow
 
 permissions:
-  contents: write # Grant write permissions to push changes
+  contents: write # Allow modifications to repository content
 
 jobs:
   run-weather:
-    runs-on: ubuntu-latest  # Use Ubuntu VM
+    runs-on: ubuntu-latest  # Execute on the latest Ubuntu virtual machine
 
     steps:
-    # Check out the repository
+    # Step 1: Retrieve the repository contents
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    # Set up Python 
+    # Step 2: Configure the Python environment
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
 
-    # Set up bash and wget
+    # Step 3: Install bash and wget tools
     - name: Set up bash and wget
       run: sudo apt-get update && sudo apt-get install -y wget
 
-    # Run the weather script
+    # Step 4: Execute the weather data script
     - name: Run weather script
-      run: bash weather.sh  # Corrected to run the script with bash
+      run: bash weather.sh  # Use bash to execute the script
 
-    # Commit and push the new weather data
+    # Step 5: Save and upload the updated weather data
     - name: Commit and push changes
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,11 +40,11 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         
-        # Add the new weather data
+        # Stage the updated weather data
         git add data/weather/*.json
         
-        # Commit the changes (only if there are changes)
+        # Commit changes if there are any
         git commit -m "Update weather data for $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
         
-        # Push the changes back to the repository
+        # Push the changes to the main branch
         git push origin main
