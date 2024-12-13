@@ -1,52 +1,50 @@
-name: Daily Weather Fetch
+name: Run Daily Weather Data
 
 on:
   schedule:
-    # Run at 9:59 AM UTC every day
-    - cron: '59 9 * * *'
-  workflow_dispatch:  # Allow manual execution of the workflow
+     # Run daily at 10:00 AM UTC
+    - cron: '0 10 * * *'
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 permissions:
-  contents: write  # Enable write permissions for pushing updates
+  contents: write # Grant write permissions to push changes
 
 jobs:
-  fetch-weather-data:
-    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+  run-weather:
+    runs-on: ubuntu-latest  # Use Ubuntu VM
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Clone Repository
-        uses: actions/checkout@v3
+    # Check out the repository
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # Step 2: Configure Python Environment
-      - name: Python Setup
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+    # Set up Python 
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
 
-      # Step 3: Install Required Tools
-      - name: Install Utilities
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y wget
+    # Set up bash and wget
+    - name: Set up bash and wget
+      run: sudo apt-get update && sudo apt-get install -y wget
 
-      # Step 4: Execute the Weather Script
-      - name: Execute Weather Script
-        run: bash scripts/fetch_weather.sh
+    # Run the weather script
+    - name: Run weather script
+      run: bash weather.sh  # Corrected to run the script with bash
 
-      # Step 5: Commit and Push Changes
-      - name: Update Weather Data
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config --global user.name "Automated Bot"
-          git config --global user.email "bot@github.com"
-          
-          # Stage changes
-          git add data/weather/*.json
-          
-          # Commit updates if changes exist
-          git commit -m "Weather Data Update: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit."
-          
-          # Push to main branch
-          git push origin main
+    # Commit and push the new weather data
+    - name: Commit and push changes
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # Add the new weather data
+        git add data/weather/*.json
+        
+        # Commit the changes (only if there are changes)
+        git commit -m "Update weather data for $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+        
+        # Push the changes back to the repository
+        git push origin main
