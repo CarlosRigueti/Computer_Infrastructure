@@ -108,3 +108,9 @@ I tested the workflow by pushing changes and meticulously verified the logs to c
 
 **Conclusion:**  
 The automation process is effective and reliably saves and uploads daily weather data to the repository. This setup is fully functional and ensures continuous updates without issues.
+
+#### Author: Carlos Rigueti
+
+* **Carlos Rigueti** - I am currently studing at [ATU](https://www.atu.ie/) - Atlantic Technological University the course Higher Diploma in Computing in Data Analysis. To contact me for more information, please reach me out on GitHub or add me on [LinkeIn.](https://www.linkedin.com/in/carlos-rigueti-b6323926/).
+
+***
